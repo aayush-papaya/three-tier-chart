@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: {{ .Release.Namespace }}
+data:
+  greeting: {{ .Values.frontend.greeting | quote }}
+  version: {{ .Values.frontend.version | quote }}
+  backend_host: backend.{{ .Release.Namespace }}.svc.cluster.local
+  default.conf.template: |
+    server {
+        listen 80;
+        server_name _;
+
+        location = /pod {
+            default_type text/plain;
+            return 200 "greeting: ${WORKSHOP_GREETING}\nversion:  ${WORKSHOP_VERSION}\npod:      $hostname\n";
+        }
+
+        location /api/ {
+            proxy_pass http://${WORKSHOP_BACKEND_HOST}:80/;
+            proxy_set_header Host $host;
+        }
+
+        location /files/ {
+            alias /data/;
+            autoindex on;
+        }
+
+        location / {
+            root /usr/share/nginx/html;
+            try_files $uri $uri/ /index.html;
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: frontend
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      serviceAccountName: frontend
+      containers:
+        - name: nginx
+          image: {{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          env:
+            - name: NGINX_ENVSUBST_FILTER
+              value: "WORKSHOP_"
+            - name: WORKSHOP_GREETING
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: greeting
+            - name: WORKSHOP_VERSION
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: version
+            - name: WORKSHOP_BACKEND_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-config
+                  key: backend_host
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nginx/templates
+              readOnly: true
+            - name: data
+              mountPath: /data
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+        - name: config
+          configMap:
+            name: frontend-config
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

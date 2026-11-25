@@ -1,0 +1,30 @@
+frontend:
+  replicas: 2
+  image:
+    repository: three-tier-frontend
+    tag: "1"
+  greeting: "Hello from the frontend"
+  version: "v2"
+
+backend:
+  replicas: 2
+  image:
+    repository: three-tier-backend
+    tag: "3"
+
+database:
+  replicas: 1
+  image:
+    repository: postgres
+    tag: "16"
+  storage: 1Gi
+
+secretName: db-credentials
+
+serviceAccounts:
+  - frontend
+  - backend
+  - database
+
+reviewer:
+  enabled: true

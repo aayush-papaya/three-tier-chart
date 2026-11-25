@@ -1,0 +1,6 @@
+apiVersion: v2
+name: three-tier
+description: A three-tier application for a web application
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

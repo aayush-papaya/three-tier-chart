@@ -1,0 +1,6 @@
+frontend:
+  replicas: 4
+  version: "v2-prod"
+
+backend:
+  replicas: 4
