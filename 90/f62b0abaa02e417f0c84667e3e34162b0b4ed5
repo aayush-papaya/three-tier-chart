@@ -1,0 +1,28 @@
+Chart.yaml
+  h_cb2ee3508fa1a1 1-6
+templates/backend.yaml
+  h_cb2ee3508fa1a1 1-89
+templates/database.yaml
+  h_cb2ee3508fa1a1 1-97
+templates/frontend.yaml
+  h_cb2ee3508fa1a1 1-125
+templates/rbac.yaml
+  h_cb2ee3508fa1a1 1-37
+templates/serviceaccounts.yaml
+  h_cb2ee3508fa1a1 1-8
+values-prod.yaml
+  h_cb2ee3508fa1a1 1-6
+values.yaml
+  h_cb2ee3508fa1a1 1-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "90f62b0abaa02e417f0c84667e3e34162b0b4ed5",
+  "prompts": {},
+  "humans": {
+    "h_cb2ee3508fa1a1": {
+      "author": "aayush-papaya <163233054+aayush-papaya@users.noreply.github.com>"
+    }
+  }
+}
