@@ -1,5 +1,5 @@
 frontend:
-  replicas: 2
+  replicas: 3
   image:
     repository: three-tier-frontend
     tag: "1"
